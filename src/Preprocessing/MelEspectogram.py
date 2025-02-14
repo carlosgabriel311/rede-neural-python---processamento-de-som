@@ -10,36 +10,37 @@ def save_mel_spectrogram(audio_path, save_path):
     mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128)
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-    plt.figure(figsize=(2, 2), dpi=64)  # Gera imagem 128x128
+    plt.figure(figsize=(2, 2), dpi=64)  # 128x128 pixels
     librosa.display.specshow(mel_spec_db, sr=sr, cmap='inferno')
     plt.axis('off')
 
     plt.savefig(save_path, bbox_inches='tight', pad_inches=0)
     plt.close()
 
-# Diretório onde estão as pastas de áudio
-root_dir = "../rede_neural_python_processamento_de_som/data/audios/"
+# Diretório onde estão as pastas dos atores (dados brutos)
+root_dir = "../rede_neural_python_processamento_de_som/data/sort_audios/"
 
-# Diretório para salvar as imagens
+# Diretório de saída organizado por dígito
 output_dir = "../rede_neural_python_processamento_de_som/data/imgs/"
-os.makedirs(output_dir, exist_ok=True)  # Cria a pasta de destino se não existir
+os.makedirs(output_dir, exist_ok=True)
 
-# Percorre todas as pastas e arquivos dentro de `root_dir`
+# Percorre todas as pastas de atores e arquivos .wav
 for subdir, _, files in os.walk(root_dir):
     for file in files:
-        if file.endswith(".wav"):  # Processa apenas arquivos .wav
+        if file.endswith(".wav"):  # Processa apenas arquivos de áudio
             audio_path = os.path.join(subdir, file)
 
-            # Cria um caminho de saída correspondente para a imagem
-            relative_path = os.path.relpath(subdir, root_dir)  # Nome relativo da subpasta
-            output_folder = os.path.join(output_dir, relative_path)
-            os.makedirs(output_folder, exist_ok=True)  # Garante que a pasta exista
+            # Obtém o dígito do nome do arquivo (assumindo que o nome começa com o dígito)
+            digit = file[0]  # Exemplo: "0_01_0.wav" → digit = "0"
 
-            # Nome do arquivo de imagem correspondente
-            image_filename = os.path.splitext(file)[0] + ".png"
-            save_path = os.path.join(output_folder, image_filename)
+            if digit.isdigit():  # Garante que seja um número entre 0 e 9
+                output_folder = os.path.join(output_dir, digit)
+                os.makedirs(output_folder, exist_ok=True)  # Cria a pasta do dígito
 
-            # Gera e salva o espectrograma
-            save_mel_spectrogram(audio_path, save_path)
-            print(f"✅ Salvo: {save_path}")
+                # Nome do arquivo de imagem correspondente
+                image_filename = os.path.splitext(file)[0] + ".png"
+                save_path = os.path.join(output_folder, image_filename)
 
+                # Gera e salva o espectrograma
+                save_mel_spectrogram(audio_path, save_path)
+                print(f"✅ Salvo: {save_path}")
