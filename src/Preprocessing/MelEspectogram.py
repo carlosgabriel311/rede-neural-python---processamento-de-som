@@ -10,7 +10,7 @@ def save_mel_spectrogram(audio_path, save_path):
     mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128)
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-    plt.figure(figsize=(2, 2), dpi=64)  # 128x128 pixels
+    plt.figure(figsize=(1, 1), dpi=32)  # 32x32 pixels
     librosa.display.specshow(mel_spec_db, sr=sr, cmap='inferno')
     plt.axis('off')
 
