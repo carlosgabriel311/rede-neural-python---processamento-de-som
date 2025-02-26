@@ -3,7 +3,6 @@ from datetime import datetime
 import torch
 import matplotlib.pyplot as plt
 
-
 class Training:
     def __init__(self, model, name_model, criterion, optimizer, device, train_loader, valid_loader) :
         '''
@@ -16,12 +15,11 @@ class Training:
         self.train_loader = train_loader
         self.valid_loader = valid_loader
         self.name_model = name_model
+        self.sum_accuracy = 0
+        self.sum_accuracy_squared = 0
+        self.count_accuracy = 0
 
-    def start_training(self, epochs):
-        self.training_loop(epochs)
-        torch.save(self.model, f'../rede_neural_python_processamento_de_som/src/trained_models/model_{self.name_model}.pth')
-
-    def training_loop(self, epochs, print_every=1):
+    def start_training(self, epochs, print_every=1):
         '''
         Function defining the entire training loop
         '''
@@ -29,7 +27,6 @@ class Training:
         # set objects for storing metrics
         train_losses = []
         valid_losses = []
-        self.plot_losses(train_losses, valid_losses)
         # Train model
         for epoch in range(0, epochs):
 
@@ -46,13 +43,33 @@ class Training:
                 
                 train_acc = self.get_accuracy(self.train_loader)
                 valid_acc = self.get_accuracy(self.valid_loader)
-                    
+
+                #Realiza as somas das acuracias para utilização
+                self.sum_accuracy += valid_acc
+                self.sum_accuracy_squared += valid_acc ** 2
+                self.count_accuracy += 1
+
+                #calcula a média
+                average_valid_accuracy = self.sum_accuracy / self.count_accuracy 
+
+                # Cálculo do desvio padrão amostral
+                if self.count_accuracy > 1:
+                    variance = ((self.sum_accuracy_squared / self.count_accuracy) - (average_valid_accuracy ** 2)) * (self.count_accuracy / (self.count_accuracy - 1))
+                    std_dev = torch.sqrt(variance)
+                else:
+                    std_dev = 0  # Se só tiver um valor, desvio padrão é 0
+
+                # Exibir os valores
                 print(f'{datetime.now().time().replace(microsecond=0)} --- '
-                    f'Epoch: {epoch}\t'
+                    f'Epoch:{epoch}\t'
                     f'Train loss: {train_loss:.4f}\t'
                     f'Valid loss: {valid_loss:.4f}\t'
                     f'Train accuracy: {100 * train_acc:.2f}\t'
-                    f'Valid accuracy: {100 * valid_acc:.2f}')
+                    f'Valid accuracy: {100 * valid_acc:.2f}\t'
+                    f'Valid average accuracy: {100 * average_valid_accuracy:.2f}\t'
+                    f'Valid Standard deviation: {100 * std_dev:.2f}')
+                
+                self.save_to_file(self.name_model, epoch, train_loss, valid_loss, train_acc, valid_acc, average_valid_accuracy, std_dev)
 
         self.plot_losses(train_losses, valid_losses)
     
@@ -151,3 +168,19 @@ class Training:
         
         # change the plot style to default
         plt.style.use('default')
+
+    def save_to_file(self, filename, epoch, train_loss, valid_loss, train_acc, valid_acc, average_valid_accuracy, std_dev):
+        # Abre o arquivo no modo de append (adiciona ao final do arquivo)
+        with open(filename, 'a') as file:
+        # Formata a string que será salva no arquivo
+            log_message = (f'{datetime.now().time().replace(microsecond=0)} --- '
+                            f'Epoch:{epoch}\t'
+                            f'Train loss: {train_loss:.4f}\t'
+                            f'Valid loss: {valid_loss:.4f}\t'
+                            f'Train accuracy: {100 * train_acc:.2f}\t'
+                            f'Valid accuracy: {100 * valid_acc:.2f}\t'
+                            f'Valid average accuracy: {100 * average_valid_accuracy:.2f}\t'
+                            f'Valid Standard deviation: {100 * std_dev:.2f}\n')
+                
+                # Escreve a mensagem no arquivo
+            file.write(log_message)

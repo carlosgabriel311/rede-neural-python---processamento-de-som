@@ -10,7 +10,7 @@ def save_mel_spectrogram(audio_path, save_path):
     mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128)
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-    plt.figure(figsize=(1, 1), dpi=32)  # 32x32 pixels
+    plt.figure(figsize=(2, 2), dpi=32)  # 64x64 pixels
     librosa.display.specshow(mel_spec_db, sr=sr, cmap='inferno')
     plt.axis('off')
 
@@ -21,7 +21,7 @@ def save_mel_spectrogram(audio_path, save_path):
 root_dir = "../rede_neural_python_processamento_de_som/data/sort_audios/"
 
 # Diretório de saída organizado por dígito
-output_dir = "../rede_neural_python_processamento_de_som/data/imgs/"
+output_dir = "../rede_neural_python_processamento_de_som/data/train_imgs/"
 os.makedirs(output_dir, exist_ok=True)
 
 # Percorre todas as pastas de atores e arquivos .wav

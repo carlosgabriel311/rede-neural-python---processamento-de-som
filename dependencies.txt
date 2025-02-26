@@ -2,4 +2,4 @@ librosa
 matplotlib
 torch
 torchvision
-seaborn
+torchaudio
